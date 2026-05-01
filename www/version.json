@@ -1,6 +1,6 @@
 {
-  "version": "1.5",
-  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.5/jintianchishenme.apk",
-  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.5/jintianchishenme.apk",
-  "changelog": "1. 新增好友互动功能\n2. 点菜请求、留言推荐\n3. 修复自动更新安装问题"
+  "version": "1.6",
+  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.6/jintianchishenme.apk",
+  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.6/jintianchishenme.apk",
+  "changelog": "1. 检测到新版本自动下载安装\n2. 好友支持删除\n3. 点菜请求支持删除"
 }

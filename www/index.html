@@ -651,6 +651,12 @@ body {
 .friend-info { flex: 1; margin-left: 12px; }
 .friend-name { font-size: 15px; font-weight: 500; }
 .friend-code { font-size: 12px; color: var(--text-light); }
+.friend-delete-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: none; background: #ff4757; color: white;
+  font-size: 16px; line-height: 1; cursor: pointer;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
 .friend-badge {
   width: 20px;
   height: 20px;
@@ -802,6 +808,12 @@ body {
 .req-status.pending { background: #FFF3E0; color: #E65100; }
 .req-status.accepted { background: #E8F5E9; color: #2E7D32; }
 .req-status.declined { background: #FFEBEE; color: #C62828; }
+.req-delete-btn {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: none; background: #ff4757; color: white;
+  font-size: 14px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
 
 /* Friend meals view */
 .friend-meals-view { display: none; padding: 16px; }
@@ -1514,7 +1526,7 @@ function renderStats() {
 }
 
 // ===== Auto Update =====
-const APP_VERSION = '1.5';
+const APP_VERSION = '1.6';
 // Replace with your GitHub repo: https://raw.githubusercontent.com/{owner}/{repo}/main/version.json
 // Supports multiple mirror URLs separated by | for China users
 const UPDATE_CHECK_URL = 'https://mirror.ghproxy.cc/https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json|https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json';
@@ -1548,9 +1560,8 @@ async function checkForUpdate() {
         pendingDownloadUrls = [];
         if (info.downloadUrl) pendingDownloadUrls.push(info.downloadUrl);
         if (info.downloadUrlFallback) pendingDownloadUrls.push(info.downloadUrlFallback);
-        document.getElementById('updateTitle').textContent = `发现新版本 v${info.version}`;
-        document.getElementById('updateDesc').textContent = (info.changelog || '点击立即更新').replace(/\\n/g, ' ');
-        document.getElementById('updateBanner').classList.add('show');
+        // Auto-start update without waiting for user tap
+        startUpdate();
       }
       return; // Success, stop trying other URLs
     } catch (e) {
@@ -1762,12 +1773,21 @@ function listenFriends() {
               <div class="friend-name">${escHtml(user.nickname)}</div>
               <div class="friend-code">${fc}</div>
             </div>
+            <button class="friend-delete-btn" onclick="event.stopPropagation();removeFriend('${fc}','${escHtml(user.nickname)}')">×</button>
           </div>`;
         }
       } catch (e) {}
     }
     list.innerHTML = html || '<div class="social-empty"><p>加载中...</p></div>';
   });
+}
+
+function removeFriend(friendCode, friendName) {
+  if (!confirm('确定删除好友「' + friendName + '」？')) return;
+  if (!db) return;
+  db.ref('friends/' + myCode + '/' + friendCode).remove();
+  db.ref('friends/' + friendCode + '/' + myCode).remove();
+  showToast('已删除好友');
 }
 
 // Chat
@@ -1882,7 +1902,10 @@ function listenRequests() {
       html += `<div class="request-card">
         <div class="req-header">
           <span class="req-from">${escHtml(req.fromName || '好友')} 的点菜</span>
-          <span class="req-status ${statusClass}">${statusText}</span>
+          <span style="display:flex;align-items:center;gap:6px">
+            <span class="req-status ${statusClass}">${statusText}</span>
+            <button class="req-delete-btn" onclick="event.stopPropagation();deleteRequest('${id}')">×</button>
+          </span>
         </div>
         <div class="req-dish">${escHtml(req.dish)}</div>
         <div style="font-size:12px;color:#999">${timeStr}</div>`;
@@ -1914,6 +1937,13 @@ function respondRequest(reqId, fromCode, status, dish) {
   });
 
   showToast(status === 'accepted' ? '已接受点菜' : '已拒绝');
+}
+
+function deleteRequest(reqId) {
+  if (!confirm('确定删除该点菜请求？')) return;
+  if (!db) return;
+  db.ref('requests/' + myCode + '/' + reqId).remove();
+  showToast('已删除');
 }
 
 // Activity feed
