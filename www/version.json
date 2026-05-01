@@ -1,6 +1,6 @@
 {
-  "version": "1.2",
-  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.2/jintianchishenme.apk",
-  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.2/jintianchishenme.apk",
-  "changelog": "1. 修复转盘结果与显示不一致的bug"
+  "version": "1.3",
+  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.3/jintianchishenme.apk",
+  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.3/jintianchishenme.apk",
+  "changelog": "1. 彻底修复转盘结果与指针不一致\n2. 转盘停下时高亮选中扇区"
 }

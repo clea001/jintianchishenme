@@ -925,6 +925,8 @@ const canvas = document.getElementById('wheelCanvas');
 const ctx = canvas.getContext('2d');
 const colors = ['#FF6B35','#FFA726','#FFCC02','#66BB6A','#42A5F5','#AB47BC','#EC407A','#8D6E63','#78909C','#26C6DA'];
 
+let highlightIndex = -1;
+
 function drawWheel(rotation) {
   if (rotation === undefined) rotation = currentAngle;
   const foods = wheelFoods;
@@ -956,6 +958,13 @@ function drawWheel(rotation) {
     ctx.closePath();
     ctx.fillStyle = colors[i % colors.length];
     ctx.fill();
+
+    // Highlight the selected segment
+    if (i === highlightIndex) {
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.fill();
+    }
+
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -1025,6 +1034,7 @@ function onPointerUp(e) {
   if (Math.abs(velocity) < 0.3) return; // Too slow, just stop
 
   // Fling: decelerate naturally
+  highlightIndex = -1;
   isSpinning = true;
   document.getElementById('btnSpin').disabled = true;
   document.getElementById('wheelResult').textContent = '';
@@ -1068,11 +1078,10 @@ function getSelectedFood(angle) {
   if (wheelFoods.length === 0) return null;
   const n = wheelFoods.length;
   const arc = (Math.PI * 2) / n;
-  // Pointer is at top (-PI/2 in canvas coords).
-  // Segment i spans: i*arc to (i+1)*arc in wheel-local coords (starting from top).
-  // Wheel-local angle of pointer = -PI/2 - currentAngle.
-  // Shift so segment 0 starts at 0: add PI/2.
-  let localAngle = (-angle + Math.PI / 2) % (Math.PI * 2);
+  // Pointer is at top: screen angle -PI/2 from center.
+  // Canvas is rotated by `angle`, so in wheel-local coords the pointer is at: -PI/2 - angle.
+  // Segment 0 starts at -PI/2 in local coords, so shift by +PI/2 to make segment 0 start at 0.
+  let localAngle = (-angle - Math.PI / 2) % (Math.PI * 2);
   if (localAngle < 0) localAngle += Math.PI * 2;
   const index = Math.floor(localAngle / arc) % n;
   return { food: wheelFoods[index], index: index };
@@ -1080,6 +1089,8 @@ function getSelectedFood(angle) {
 
 function showResult(result) {
   if (result) {
+    highlightIndex = result.index;
+    drawWheel();
     document.getElementById('wheelResult').textContent = `就吃 ${result.food}！`;
     showToast(`今天吃 ${result.food}！`);
   }
@@ -1125,6 +1136,7 @@ function spinWheel() {
     return;
   }
   isSpinning = true;
+  highlightIndex = -1;
   document.getElementById('btnSpin').disabled = true;
   document.getElementById('wheelResult').textContent = '';
 
@@ -1134,16 +1146,18 @@ function spinWheel() {
   // Pick a random food
   const selectedIndex = Math.floor(Math.random() * n);
 
-  // Calculate target angle so selected segment lands at pointer (top)
-  // Segment i center in wheel-local coords: i*arc + arc/2
-  // Pointer local angle with rotation: -targetAngle + PI/2 = i*arc + arc/2
-  // targetAngle = PI/2 - i*arc - arc/2 + fullSpins*2*PI
+  // Calculate target angle so selected segment's center lands at pointer (top).
+  // getSelectedFood(a) returns index i when: floor((-a - PI/2) % 2PI / arc) = i
+  // So we need: -targetAngle - PI/2 = selectedIndex * arc  (mod 2PI)
+  // => targetAngle = -selectedIndex * arc - PI/2 + fullSpins * 2PI
+  // relativeAngle = targetAngle - currentAngle
   const fullSpins = 5 + Math.floor(Math.random() * 3);
-  const targetAngle = currentAngle + (Math.PI / 2 - selectedIndex * arc - arc / 2 - currentAngle) + fullSpins * Math.PI * 2;
+  const absoluteTarget = -selectedIndex * arc - Math.PI / 2 + fullSpins * Math.PI * 2;
+  const relativeAngle = absoluteTarget - currentAngle;
 
   const duration = 3500 + Math.random() * 1500;
 
-  animateToAngle(targetAngle, duration, () => {
+  animateToAngle(currentAngle + relativeAngle, duration, () => {
     isSpinning = false;
     document.getElementById('btnSpin').disabled = false;
     showResult(getSelectedFood(currentAngle));
@@ -1186,7 +1200,7 @@ function renderStats() {
 }
 
 // ===== Auto Update =====
-const APP_VERSION = '1.2';
+const APP_VERSION = '1.3';
 // Replace with your GitHub repo: https://raw.githubusercontent.com/{owner}/{repo}/main/version.json
 // Supports multiple mirror URLs separated by | for China users
 const UPDATE_CHECK_URL = 'https://mirror.ghproxy.cc/https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json|https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json';
