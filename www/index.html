@@ -334,28 +334,16 @@ body {
 .wheel-wrapper {
   position: relative;
   width: 300px;
-  height: 300px;
+  height: 320px;
+  padding-top: 20px;
 }
 .wheel-canvas {
   width: 300px;
   height: 300px;
 }
-.wheel-pointer {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  border-top: 24px solid var(--primary);
-  z-index: 10;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-}
 .wheel-center {
   position: absolute;
-  top: 50%;
+  top: calc(50% + 10px);
   left: 50%;
   transform: translate(-50%, -50%);
   width: 50px;
@@ -626,7 +614,6 @@ body {
 <div class="page" id="page-wheel">
   <div class="wheel-container">
     <div class="wheel-wrapper">
-      <div class="wheel-pointer"></div>
       <canvas class="wheel-canvas" id="wheelCanvas" width="600" height="600"></canvas>
       <div class="wheel-center">?</div>
     </div>
@@ -982,6 +969,22 @@ function drawWheel(rotation) {
     ctx.restore();
   }
   ctx.restore();
+
+  // Draw pointer at top (exact same coordinate as the formula uses: -PI/2 = top of circle)
+  const px = 300, py = 300 - 280; // tip at wheel edge, pointing down into wheel
+  ctx.save();
+  ctx.translate(px, py);
+  ctx.beginPath();
+  ctx.moveTo(0, 0);       // tip (pointing down into wheel)
+  ctx.lineTo(-14, -22);   // left base
+  ctx.lineTo(14, -22);    // right base
+  ctx.closePath();
+  ctx.fillStyle = '#FF6B35';
+  ctx.fill();
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
 }
 
 // ---- Touch/drag spin ----
@@ -1200,7 +1203,7 @@ function renderStats() {
 }
 
 // ===== Auto Update =====
-const APP_VERSION = '1.3';
+const APP_VERSION = '1.4';
 // Replace with your GitHub repo: https://raw.githubusercontent.com/{owner}/{repo}/main/version.json
 // Supports multiple mirror URLs separated by | for China users
 const UPDATE_CHECK_URL = 'https://mirror.ghproxy.cc/https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json|https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json';
