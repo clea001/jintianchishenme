@@ -1,6 +1,6 @@
 {
-  "version": "1.6",
-  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.6/jintianchishenme.apk",
-  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.6/jintianchishenme.apk",
-  "changelog": "1. 检测到新版本自动下载安装\n2. 好友支持删除\n3. 点菜请求支持删除"
+  "version": "1.7",
+  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.7/jintianchishenme.apk",
+  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.7/jintianchishenme.apk",
+  "changelog": "1. 修复转盘页面按钮重叠问题\n2. 检测到新版本自动下载安装\n3. 好友支持删除\n4. 点菜请求支持删除"
 }

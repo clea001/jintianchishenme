@@ -1057,6 +1057,8 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('page-' + tab.dataset.tab).classList.add('active');
+    // Hide FAB on wheel tab to avoid overlap with food input
+    document.getElementById('fabAdd').style.display = tab.dataset.tab === 'wheel' ? 'none' : 'flex';
   });
 });
 
@@ -1526,7 +1528,7 @@ function renderStats() {
 }
 
 // ===== Auto Update =====
-const APP_VERSION = '1.6';
+const APP_VERSION = '1.7';
 // Replace with your GitHub repo: https://raw.githubusercontent.com/{owner}/{repo}/main/version.json
 // Supports multiple mirror URLs separated by | for China users
 const UPDATE_CHECK_URL = 'https://mirror.ghproxy.cc/https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json|https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json';
