@@ -1,5 +1,6 @@
 {
   "version": "1.1",
-  "downloadUrl": "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest/download/今天吃什么.apk",
+  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/latest/download/今天吃什么.apk",
+  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/latest/download/今天吃什么.apk",
   "changelog": "1. 新增转盘手势滑动交互\n2. 修复照片记录bug\n3. 新增自动更新功能"
 }

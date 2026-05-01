@@ -1151,7 +1151,8 @@ function renderStats() {
 // ===== Auto Update =====
 const APP_VERSION = '1.1';
 // Replace with your GitHub repo: https://raw.githubusercontent.com/{owner}/{repo}/main/version.json
-const UPDATE_CHECK_URL = '';
+// Supports multiple mirror URLs separated by | for China users
+const UPDATE_CHECK_URL = 'https://mirror.ghproxy.cc/https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json|https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json';
 
 // Compare version strings (e.g. "1.2.0" vs "1.1.0")
 function isNewerVersion(remote, local) {
@@ -1166,21 +1167,30 @@ function isNewerVersion(remote, local) {
   return false;
 }
 
-let pendingDownloadUrl = '';
+let pendingDownloadUrls = [];
+let updateInfo = null;
 
 async function checkForUpdate() {
   if (!UPDATE_CHECK_URL) return;
-  try {
-    const resp = await fetch(UPDATE_CHECK_URL + '?t=' + Date.now());
-    const info = await resp.json();
-    if (info.version && isNewerVersion(info.version, APP_VERSION)) {
-      pendingDownloadUrl = info.downloadUrl;
-      document.getElementById('updateTitle').textContent = `发现新版本 v${info.version}`;
-      document.getElementById('updateDesc').textContent = info.changelog || '点击立即更新';
-      document.getElementById('updateBanner').classList.add('show');
+  const urls = UPDATE_CHECK_URL.split('|');
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url.trim() + '?t=' + Date.now(), { signal: AbortSignal.timeout(8000) });
+      const info = await resp.json();
+      if (info.version && isNewerVersion(info.version, APP_VERSION)) {
+        updateInfo = info;
+        // Collect all download URLs: mirror first, then fallback
+        pendingDownloadUrls = [];
+        if (info.downloadUrl) pendingDownloadUrls.push(info.downloadUrl);
+        if (info.downloadUrlFallback) pendingDownloadUrls.push(info.downloadUrlFallback);
+        document.getElementById('updateTitle').textContent = `发现新版本 v${info.version}`;
+        document.getElementById('updateDesc').textContent = (info.changelog || '点击立即更新').replace(/\\n/g, ' ');
+        document.getElementById('updateBanner').classList.add('show');
+      }
+      return; // Success, stop trying other URLs
+    } catch (e) {
+      continue; // Try next mirror
     }
-  } catch (e) {
-    // Silent fail - network error or invalid JSON
   }
 }
 
@@ -1189,45 +1199,46 @@ function dismissUpdate() {
 }
 
 async function startUpdate() {
-  if (!pendingDownloadUrl) return;
+  if (pendingDownloadUrls.length === 0) return;
+
+  document.getElementById('updateBanner').classList.remove('show');
+  document.getElementById('updateProgress').classList.add('show');
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('progressText').textContent = '正在连接...';
 
   // Try native plugin first
   if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppUpdate) {
-    try {
-      document.getElementById('updateBanner').classList.remove('show');
-      document.getElementById('updateProgress').classList.add('show');
-      document.getElementById('progressBar').style.width = '0%';
-      document.getElementById('progressText').textContent = '正在下载...';
+    // Try each URL until one works
+    for (const url of pendingDownloadUrls) {
+      try {
+        document.getElementById('progressText').textContent = '正在下载...';
+        await window.Capacitor.Plugins.AppUpdate.downloadAndInstall({ url: url });
 
-      await window.Capacitor.Plugins.AppUpdate.downloadAndInstall({ url: pendingDownloadUrl });
+        // Simulate progress
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 15;
+          if (progress > 90) progress = 90;
+          document.getElementById('progressBar').style.width = progress + '%';
+          document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        }, 500);
 
-      // Simulate progress (DownloadManager handles actual download)
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress > 90) progress = 90;
-        document.getElementById('progressBar').style.width = progress + '%';
-        document.getElementById('progressText').textContent = Math.round(progress) + '%';
-      }, 500);
-
-      // Clean up after some time
-      setTimeout(() => {
-        clearInterval(interval);
-        document.getElementById('progressBar').style.width = '100%';
-        document.getElementById('progressText').textContent = '下载完成，正在安装...';
         setTimeout(() => {
-          document.getElementById('updateProgress').classList.remove('show');
-        }, 3000);
-      }, 5000);
-
-      return;
-    } catch (e) {
-      // Fall through to browser download
+          clearInterval(interval);
+          document.getElementById('progressBar').style.width = '100%';
+          document.getElementById('progressText').textContent = '下载完成，正在安装...';
+          setTimeout(() => document.getElementById('updateProgress').classList.remove('show'), 3000);
+        }, 5000);
+        return;
+      } catch (e) {
+        continue; // Try next URL
+      }
     }
   }
 
-  // Fallback: open in browser
-  window.open(pendingDownloadUrl, '_system');
+  // Fallback: open in browser (use mirror first)
+  document.getElementById('updateProgress').classList.remove('show');
+  window.open(pendingDownloadUrls[0], '_system');
 }
 
 // ===== Init =====
