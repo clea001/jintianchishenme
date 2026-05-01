@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>今天吃什么</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #FF6B35;
+  --primary-light: #FF8F5E;
+  --bg: #FFF8F0;
+  --card: #FFFFFF;
+  --text: #2D2D2D;
+  --text-light: #888;
+  --danger: #E74C3C;
+  --success: #27AE60;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+body {
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  padding: 20px 16px 16px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(255,107,53,0.3);
+}
+.header h1 { font-size: 22px; font-weight: 700; }
+.header .date { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  background: var(--card);
+  border-bottom: 1px solid #f0e8e0;
+  position: sticky;
+  top: 62px;
+  z-index: 99;
+}
+.tab {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-light);
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+.tab.active { color: var(--primary); font-weight: 600; }
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* Page containers */
+.page { display: none; padding: 16px; }
+.page.active { display: block; }
+
+/* Record button */
+.fab {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  font-size: 28px;
+  box-shadow: 0 4px 16px rgba(255,107,53,0.4);
+  cursor: pointer;
+  z-index: 50;
+  transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fab:active { transform: scale(0.9); }
+
+/* Meal card */
+.meal-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.meal-card .meal-time {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-bottom: 6px;
+}
+.meal-card .meal-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.meal-card .meal-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.meal-card .meal-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.tag-breakfast { background: #FFF3E0; color: #E65100; }
+.tag-lunch { background: #E8F5E9; color: #2E7D32; }
+.tag-dinner { background: #E3F2FD; color: #1565C0; }
+.tag-snack { background: #FCE4EC; color: #C62828; }
+.tag-other { background: #F3E5F5; color: #6A1B9A; }
+
+.meal-card .delete-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.06);
+  color: var(--text-light);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Empty state */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+}
+.empty .icon { font-size: 48px; margin-bottom: 12px; }
+.empty p { font-size: 14px; line-height: 1.6; }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.show {
+  display: flex;
+}
+.modal {
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 24px 20px;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.form-group input[type="text"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e8e0d8;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #FAFAFA;
+  font-family: inherit;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary);
+  background: white;
+}
+.form-group textarea { resize: vertical; min-height: 60px; }
+
+/* Photo upload */
+.photo-upload {
+  border: 2px dashed #e0d8d0;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.photo-upload:active { border-color: var(--primary); background: #FFF8F0; }
+.photo-upload input { display: none; }
+.photo-upload .upload-icon { font-size: 32px; margin-bottom: 8px; }
+.photo-upload .upload-text { font-size: 13px; color: var(--text-light); }
+.photo-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 8px;
+  display: none;
+}
+.photo-upload.has-image .photo-preview { display: block; }
+.photo-upload.has-image .upload-icon,
+.photo-upload.has-image .upload-text { display: none; }
+.remove-photo {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+.photo-upload.has-image .remove-photo { display: flex; align-items: center; justify-content: center; }
+
+/* Tag select */
+.tag-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tag-option {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #e8e0d8;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tag-option.selected {
+  border-color: var(--primary);
+  background: #FFF3E0;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* Submit button */
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+}
+.btn-submit:active { opacity: 0.85; }
+
+.btn-cancel {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  color: var(--text-light);
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+/* Wheel page */
+.wheel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+.wheel-wrapper {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
+.wheel-canvas {
+  width: 300px;
+  height: 300px;
+}
+.wheel-pointer {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 24px solid var(--primary);
+  z-index: 10;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+.wheel-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  z-index: 5;
+}
+
+.btn-spin {
+  margin-top: 30px;
+  padding: 14px 48px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255,107,53,0.3);
+  transition: transform 0.15s;
+}
+.btn-spin:active { transform: scale(0.95); }
+.btn-spin:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.wheel-result {
+  margin-top: 24px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--primary);
+  text-align: center;
+  min-height: 32px;
+}
+
+/* Wheel food list */
+.wheel-foods {
+  margin-top: 30px;
+  width: 100%;
+  max-width: 340px;
+}
+.wheel-foods h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.food-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.food-input-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid #e8e0d8;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+}
+.food-input-row input:focus { border-color: var(--primary); }
+.food-input-row button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.food-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.food-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: white;
+  border: 1.5px solid #e8e0d8;
+  border-radius: 20px;
+  font-size: 14px;
+}
+.food-tag .remove-food {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: #eee;
+  color: #999;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Stats page */
+.stats-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.stats-card h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.stats-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.stats-label {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.history-list { margin-top: 16px; }
+.history-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-light);
+  margin: 16px 0 8px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  padding: 10px 24px;
+  background: #333;
+  color: white;
+  border-radius: 20px;
+  font-size: 14px;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 999;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Update banner */
+.update-banner {
+  display: none;
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  padding: 12px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 150;
+  animation: slideDown 0.3s ease;
+}
+.update-banner.show { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+.update-banner .update-info { flex: 1; }
+.update-banner .update-title { font-size: 14px; font-weight: 600; }
+.update-banner .update-desc { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+.update-banner .btn-update {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 20px;
+  background: white;
+  color: #4CAF50;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.update-banner .btn-close-update {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Update progress */
+.update-progress {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 16px;
+  right: 16px;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 160;
+}
+.update-progress.show { display: block; }
+.update-progress .progress-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.update-progress .progress-bar-bg {
+  height: 6px;
+  background: #eee;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.update-progress .progress-bar {
+  height: 100%;
+  background: #4CAF50;
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.3s;
+}
+.update-progress .progress-text { font-size: 12px; color: #999; margin-top: 6px; text-align: right; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>今天吃什么</h1>
+  <div class="date" id="headerDate"></div>
+</div>
+
+<!-- Update Banner -->
+<div class="update-banner" id="updateBanner">
+  <div class="update-info">
+    <div class="update-title" id="updateTitle">发现新版本</div>
+    <div class="update-desc" id="updateDesc">点击立即更新</div>
+  </div>
+  <button class="btn-update" onclick="startUpdate()">立即更新</button>
+  <button class="btn-close-update" onclick="dismissUpdate()">×</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="records">记录</button>
+  <button class="tab" data-tab="wheel">转盘</button>
+  <button class="tab" data-tab="stats">统计</button>
+</div>
+
+<!-- Records Page -->
+<div class="page active" id="page-records">
+  <div id="mealList"></div>
+</div>
+
+<!-- Wheel Page -->
+<div class="page" id="page-wheel">
+  <div class="wheel-container">
+    <div class="wheel-wrapper">
+      <div class="wheel-pointer"></div>
+      <canvas class="wheel-canvas" id="wheelCanvas" width="600" height="600"></canvas>
+      <div class="wheel-center">?</div>
+    </div>
+    <button class="btn-spin" id="btnSpin" onclick="spinWheel()">转一转</button>
+    <div class="wheel-result" id="wheelResult"></div>
+
+    <div class="wheel-foods">
+      <h3>转盘食物列表</h3>
+      <div class="food-input-row">
+        <input type="text" id="foodInput" placeholder="输入食物名称">
+        <button onclick="addWheelFood()">添加</button>
+      </div>
+      <div class="food-tags" id="foodTags"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Page -->
+<div class="page" id="page-stats">
+  <div class="stats-grid">
+    <div class="stats-card">
+      <div class="stats-number" id="totalMeals">0</div>
+      <div class="stats-label">总记录数</div>
+    </div>
+    <div class="stats-card">
+      <div class="stats-number" id="totalDays">0</div>
+      <div class="stats-label">记录天数</div>
+    </div>
+  </div>
+  <div class="stats-card">
+    <h3>最近记录</h3>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fabAdd" onclick="openModal()">+</button>
+
+<!-- Add Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>记录今天吃什么</h2>
+    <div class="form-group">
+      <label>吃了什么</label>
+      <input type="text" id="mealName" placeholder="例如：红烧牛肉面">
+    </div>
+    <div class="form-group">
+      <label>类型</label>
+      <div class="tag-options" id="tagOptions">
+        <div class="tag-option selected" data-tag="breakfast">早餐</div>
+        <div class="tag-option" data-tag="lunch">午餐</div>
+        <div class="tag-option" data-tag="dinner">晚餐</div>
+        <div class="tag-option" data-tag="snack">加餐</div>
+        <div class="tag-option" data-tag="other">其他</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>拍照 / 上传图片</label>
+      <div class="photo-upload" id="photoUpload" onclick="document.getElementById('photoInput').click()">
+        <input type="file" id="photoInput" accept="image/*" capture="environment">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">点击拍照或选择图片</div>
+        <img class="photo-preview" id="photoPreview">
+        <button class="remove-photo" onclick="event.stopPropagation(); removePhoto()">×</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>备注（选填）</label>
+      <textarea id="mealNote" placeholder="味道怎么样？"></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveMeal()">保存记录</button>
+    <button class="btn-cancel" onclick="closeModal()">取消</button>
+  </div>
+</div>
+
+<!-- Update Progress -->
+<div class="update-progress" id="updateProgress">
+  <div class="progress-title">正在下载更新...</div>
+  <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-text" id="progressText">准备中...</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Data =====
+const STORAGE_KEY = 'meals';
+const WHEEL_KEY = 'wheelFoods';
+
+function getMeals() {
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+}
+function saveMeals(meals) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(meals));
+}
+function getWheelFoods() {
+  const saved = localStorage.getItem(WHEEL_KEY);
+  return saved ? JSON.parse(saved) : ['火锅', '烧烤', '麻辣烫', '寿司', '汉堡', '面条', '饺子', '炒饭'];
+}
+function saveWheelFoods(foods) {
+  localStorage.setItem(WHEEL_KEY, JSON.stringify(foods));
+}
+
+// ===== Date =====
+function formatDate() {
+  const now = new Date();
+  const days = ['日','一','二','三','四','五','六'];
+  return `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${days[now.getDay()]}`;
+}
+function formatTime(ts) {
+  const d = new Date(ts);
+  return `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+document.getElementById('headerDate').textContent = formatDate();
+
+// ===== Tabs =====
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('page-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ===== Toast =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ===== Modal =====
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('mealName').focus();
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  resetForm();
+}
+function resetForm() {
+  document.getElementById('mealName').value = '';
+  document.getElementById('mealNote').value = '';
+  currentPhoto = null;
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('photoUpload').classList.remove('has-image');
+  document.getElementById('photoInput').value = '';
+  document.querySelectorAll('.tag-option').forEach(t => t.classList.remove('selected'));
+  document.querySelector('[data-tag="breakfast"]').classList.add('selected');
+}
+
+// Tag selection
+document.querySelectorAll('.tag-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.tag-option').forEach(t => t.classList.remove('selected'));
+    opt.classList.add('selected');
+  });
+});
+
+// Photo upload
+let currentPhoto = null;
+document.getElementById('photoInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    // Compress image
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxSize = 800;
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = h * maxSize / w; w = maxSize; }
+        else { w = w * maxSize / h; h = maxSize; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      currentPhoto = canvas.toDataURL('image/jpeg', 0.7);
+      document.getElementById('photoPreview').src = currentPhoto;
+      document.getElementById('photoUpload').classList.add('has-image');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+function removePhoto() {
+  currentPhoto = null;
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('photoUpload').classList.remove('has-image');
+  document.getElementById('photoInput').value = '';
+}
+
+// Save meal
+function saveMeal() {
+  const name = document.getElementById('mealName').value.trim();
+  if (!name) { showToast('请输入吃了什么'); return; }
+  const tag = document.querySelector('.tag-option.selected')?.dataset.tag || 'other';
+  const note = document.getElementById('mealNote').value.trim();
+  const meal = { id: Date.now(), name, tag, note, photo: currentPhoto, time: Date.now() };
+  const meals = getMeals();
+  meals.unshift(meal);
+  saveMeals(meals);
+  closeModal();
+  renderMeals();
+  showToast('记录成功!');
+}
+
+// Render meals
+const tagLabels = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐', other: '其他' };
+function renderMeals() {
+  const meals = getMeals();
+  const list = document.getElementById('mealList');
+  if (meals.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon">🍜</div><p>还没有记录<br>点击右下角 + 开始记录吧</p></div>';
+    return;
+  }
+  // Group by date
+  const groups = {};
+  meals.forEach(m => {
+    const d = new Date(m.time);
+    const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(m);
+  });
+  let html = '';
+  for (const [key, items] of Object.entries(groups)) {
+    const d = new Date(items[0].time);
+    html += `<div class="history-date">${d.getMonth()+1}月${d.getDate()}日</div>`;
+    items.forEach(m => {
+      const time = new Date(m.time);
+      const timeStr = `${String(time.getHours()).padStart(2,'0')}:${String(time.getMinutes()).padStart(2,'0')}`;
+      html += `<div class="meal-card">
+        <button class="delete-btn" onclick="deleteMeal(${m.id})">×</button>
+        <div class="meal-time">${timeStr}</div>
+        <span class="meal-tag tag-${m.tag}">${tagLabels[m.tag] || '其他'}</span>
+        <div class="meal-name">${escHtml(m.name)}</div>
+        ${m.note ? `<div style="font-size:13px;color:#888;margin-top:4px">${escHtml(m.note)}</div>` : ''}
+        ${m.photo ? `<img class="meal-img" src="${m.photo}" alt="食物照片">` : ''}
+      </div>`;
+    });
+  }
+  list.innerHTML = html;
+}
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function deleteMeal(id) {
+  if (!confirm('确定删除这条记录？')) return;
+  const meals = getMeals().filter(m => m.id !== id);
+  saveMeals(meals);
+  renderMeals();
+  showToast('已删除');
+}
+
+// ===== Wheel =====
+let wheelFoods = getWheelFoods();
+let isSpinning = false;
+let currentAngle = 0;
+
+function renderWheelFoods() {
+  const container = document.getElementById('foodTags');
+  container.innerHTML = wheelFoods.map((f, i) =>
+    `<div class="food-tag">${escHtml(f)}<button class="remove-food" onclick="removeWheelFood(${i})">×</button></div>`
+  ).join('');
+}
+function addWheelFood() {
+  const input = document.getElementById('foodInput');
+  const val = input.value.trim();
+  if (!val) return;
+  if (wheelFoods.includes(val)) { showToast('已在列表中'); return; }
+  wheelFoods.push(val);
+  saveWheelFoods(wheelFoods);
+  input.value = '';
+  renderWheelFoods();
+  drawWheel();
+}
+function removeWheelFood(i) {
+  wheelFoods.splice(i, 1);
+  saveWheelFoods(wheelFoods);
+  renderWheelFoods();
+  drawWheel();
+}
+document.getElementById('foodInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addWheelFood();
+});
+
+// Draw wheel
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const colors = ['#FF6B35','#FFA726','#FFCC02','#66BB6A','#42A5F5','#AB47BC','#EC407A','#8D6E63','#78909C','#26C6DA'];
+
+function drawWheel(rotation) {
+  if (rotation === undefined) rotation = currentAngle;
+  const foods = wheelFoods;
+  if (foods.length === 0) {
+    ctx.clearRect(0, 0, 600, 600);
+    ctx.fillStyle = '#eee';
+    ctx.beginPath();
+    ctx.arc(300, 300, 280, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#999';
+    ctx.font = '24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('请添加食物', 300, 300);
+    return;
+  }
+  const n = foods.length;
+  const arc = (Math.PI * 2) / n;
+  ctx.clearRect(0, 0, 600, 600);
+  ctx.save();
+  ctx.translate(300, 300);
+  ctx.rotate(rotation);
+
+  for (let i = 0; i < n; i++) {
+    const startAngle = i * arc - Math.PI / 2;
+    const endAngle = startAngle + arc;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, 280, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Text
+    ctx.save();
+    ctx.rotate(startAngle + arc / 2);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'white';
+    ctx.font = n > 8 ? 'bold 20px sans-serif' : 'bold 26px sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.2)';
+    ctx.shadowBlur = 4;
+    const text = foods[i].length > 6 ? foods[i].slice(0, 6) + '…' : foods[i];
+    ctx.fillText(text, 160, 8);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ---- Touch/drag spin ----
+let dragState = null; // { startAngle, lastAngle, lastTime, velocity }
+let flingRaf = null;
+
+function getPointerAngle(e) {
+  const rect = canvas.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const touch = e.touches ? e.touches[0] : e;
+  return Math.atan2(touch.clientY - cy, touch.clientX - cx);
+}
+
+function onPointerDown(e) {
+  if (isSpinning) return;
+  if (wheelFoods.length === 0) return;
+  if (flingRaf) { cancelAnimationFrame(flingRaf); flingRaf = null; }
+  e.preventDefault();
+  const angle = getPointerAngle(e);
+  dragState = { startAngle: angle, lastAngle: angle, lastTime: performance.now(), velocity: 0 };
+}
+
+function onPointerMove(e) {
+  if (!dragState) return;
+  e.preventDefault();
+  const angle = getPointerAngle(e);
+  const now = performance.now();
+  let delta = angle - dragState.lastAngle;
+  // Handle wrap-around
+  if (delta > Math.PI) delta -= Math.PI * 2;
+  if (delta < -Math.PI) delta += Math.PI * 2;
+  currentAngle += delta;
+  drawWheel();
+
+  const dt = now - dragState.lastTime;
+  if (dt > 0) {
+    // Smooth velocity with exponential moving average
+    dragState.velocity = dragState.velocity * 0.5 + (delta / dt) * 1000 * 0.5;
+  }
+  dragState.lastAngle = angle;
+  dragState.lastTime = now;
+}
+
+function onPointerUp(e) {
+  if (!dragState) return;
+  e.preventDefault();
+  const velocity = dragState.velocity;
+  dragState = null;
+  if (Math.abs(velocity) < 0.3) return; // Too slow, just stop
+
+  // Fling: decelerate naturally
+  isSpinning = true;
+  document.getElementById('btnSpin').disabled = true;
+  document.getElementById('wheelResult').textContent = '';
+
+  let vel = velocity;
+  const friction = 0.97; // Deceleration factor
+  const minVel = 0.05;
+
+  function flingAnimate() {
+    vel *= friction;
+    currentAngle += vel / 60; // ~60fps
+    drawWheel();
+
+    if (Math.abs(vel) > minVel) {
+      flingRaf = requestAnimationFrame(flingAnimate);
+    } else {
+      flingRaf = null;
+      onSpinEnd();
+    }
+  }
+  flingRaf = requestAnimationFrame(flingAnimate);
+}
+
+// Mouse events
+canvas.addEventListener('mousedown', onPointerDown);
+window.addEventListener('mousemove', onPointerMove);
+window.addEventListener('mouseup', onPointerUp);
+// Touch events
+canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+window.addEventListener('touchmove', onPointerMove, { passive: false });
+window.addEventListener('touchend', onPointerUp);
+
+// ---- Determine result when spin stops ----
+function getSelectedFood() {
+  if (wheelFoods.length === 0) return null;
+  const n = wheelFoods.length;
+  const arc = (Math.PI * 2) / n;
+  // Pointer is at top (angle = -PI/2 in canvas coords)
+  // The wheel rotation that puts segment i at top: i * arc + arc/2
+  // So we reverse: which segment is at top given currentAngle?
+  let norm = ((-currentAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+  // Offset by PI/2 because segments start at -PI/2
+  norm = (norm + Math.PI / 2) % (Math.PI * 2);
+  const index = Math.floor(norm / arc) % n;
+  return wheelFoods[index];
+}
+
+function onSpinEnd() {
+  isSpinning = false;
+  document.getElementById('btnSpin').disabled = false;
+  const result = getSelectedFood();
+  if (result) {
+    document.getElementById('wheelResult').textContent = `就吃 ${result}！`;
+    showToast(`今天吃 ${result}！`);
+  }
+}
+
+// Button spin
+function spinWheel() {
+  if (isSpinning || wheelFoods.length === 0) {
+    if (wheelFoods.length === 0) showToast('请先添加食物');
+    return;
+  }
+  isSpinning = true;
+  document.getElementById('btnSpin').disabled = true;
+  document.getElementById('wheelResult').textContent = '';
+
+  // Random velocity: 15~25 rad/s
+  let vel = 15 + Math.random() * 10;
+  if (Math.random() < 0.5) vel = -vel;
+  const friction = 0.975;
+  const minVel = 0.05;
+
+  function animate() {
+    vel *= friction;
+    currentAngle += vel / 60;
+    drawWheel();
+
+    if (Math.abs(vel) > minVel) {
+      flingRaf = requestAnimationFrame(animate);
+    } else {
+      flingRaf = null;
+      onSpinEnd();
+    }
+  }
+  flingRaf = requestAnimationFrame(animate);
+}
+
+// ===== Stats =====
+function renderStats() {
+  const meals = getMeals();
+  document.getElementById('totalMeals').textContent = meals.length;
+  const days = new Set(meals.map(m => {
+    const d = new Date(m.time);
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }));
+  document.getElementById('totalDays').textContent = days.size;
+
+  const historyList = document.getElementById('historyList');
+  if (meals.length === 0) {
+    historyList.innerHTML = '<div style="text-align:center;color:#999;padding:20px">暂无记录</div>';
+    return;
+  }
+  const recent = meals.slice(0, 20);
+  let html = '';
+  let lastDate = '';
+  recent.forEach(m => {
+    const d = new Date(m.time);
+    const dateKey = `${d.getMonth()+1}月${d.getDate()}日`;
+    if (dateKey !== lastDate) {
+      html += `<div class="history-date">${dateKey}</div>`;
+      lastDate = dateKey;
+    }
+    const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    html += `<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #f5f0eb">
+      <span style="font-size:12px;color:#999;width:50px">${timeStr}</span>
+      <span class="meal-tag tag-${m.tag}" style="margin:0 8px">${tagLabels[m.tag] || '其他'}</span>
+      <span style="font-size:14px;font-weight:500">${escHtml(m.name)}</span>
+    </div>`;
+  });
+  historyList.innerHTML = html;
+}
+
+// ===== Auto Update =====
+const APP_VERSION = '1.1';
+// Replace with your GitHub repo: https://raw.githubusercontent.com/{owner}/{repo}/main/version.json
+const UPDATE_CHECK_URL = '';
+
+// Compare version strings (e.g. "1.2.0" vs "1.1.0")
+function isNewerVersion(remote, local) {
+  const r = remote.split('.').map(Number);
+  const l = local.split('.').map(Number);
+  for (let i = 0; i < Math.max(r.length, l.length); i++) {
+    const rv = r[i] || 0;
+    const lv = l[i] || 0;
+    if (rv > lv) return true;
+    if (rv < lv) return false;
+  }
+  return false;
+}
+
+let pendingDownloadUrl = '';
+
+async function checkForUpdate() {
+  if (!UPDATE_CHECK_URL) return;
+  try {
+    const resp = await fetch(UPDATE_CHECK_URL + '?t=' + Date.now());
+    const info = await resp.json();
+    if (info.version && isNewerVersion(info.version, APP_VERSION)) {
+      pendingDownloadUrl = info.downloadUrl;
+      document.getElementById('updateTitle').textContent = `发现新版本 v${info.version}`;
+      document.getElementById('updateDesc').textContent = info.changelog || '点击立即更新';
+      document.getElementById('updateBanner').classList.add('show');
+    }
+  } catch (e) {
+    // Silent fail - network error or invalid JSON
+  }
+}
+
+function dismissUpdate() {
+  document.getElementById('updateBanner').classList.remove('show');
+}
+
+async function startUpdate() {
+  if (!pendingDownloadUrl) return;
+
+  // Try native plugin first
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppUpdate) {
+    try {
+      document.getElementById('updateBanner').classList.remove('show');
+      document.getElementById('updateProgress').classList.add('show');
+      document.getElementById('progressBar').style.width = '0%';
+      document.getElementById('progressText').textContent = '正在下载...';
+
+      await window.Capacitor.Plugins.AppUpdate.downloadAndInstall({ url: pendingDownloadUrl });
+
+      // Simulate progress (DownloadManager handles actual download)
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 90) progress = 90;
+        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById('progressText').textContent = Math.round(progress) + '%';
+      }, 500);
+
+      // Clean up after some time
+      setTimeout(() => {
+        clearInterval(interval);
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('progressText').textContent = '下载完成，正在安装...';
+        setTimeout(() => {
+          document.getElementById('updateProgress').classList.remove('show');
+        }, 3000);
+      }, 5000);
+
+      return;
+    } catch (e) {
+      // Fall through to browser download
+    }
+  }
+
+  // Fallback: open in browser
+  window.open(pendingDownloadUrl, '_system');
+}
+
+// ===== Init =====
+renderMeals();
+renderWheelFoods();
+drawWheel();
+renderStats();
+checkForUpdate();
+
+// Update stats when switching to stats tab
+document.querySelector('[data-tab="stats"]').addEventListener('click', renderStats);
+</script>
+</body>
+</html>
