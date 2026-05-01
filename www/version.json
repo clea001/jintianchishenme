@@ -1,6 +1,6 @@
 {
-  "version": "1.4",
-  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.4/jintianchishenme.apk",
-  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.4/jintianchishenme.apk",
-  "changelog": "1. 指针改为Canvas绘制，与计算坐标100%一致\n2. 彻底修复转盘结果不准问题"
+  "version": "1.5",
+  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.5/jintianchishenme.apk",
+  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.5/jintianchishenme.apk",
+  "changelog": "1. 新增好友互动功能\n2. 点菜请求、留言推荐\n3. 修复自动更新安装问题"
 }

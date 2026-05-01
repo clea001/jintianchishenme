@@ -580,7 +580,238 @@ body {
   transition: width 0.3s;
 }
 .update-progress .progress-text { font-size: 12px; color: #999; margin-top: 6px; text-align: right; }
+
+/* Social / Friends */
+.social-empty { text-align: center; padding: 40px 20px; color: var(--text-light); }
+.social-empty .icon { font-size: 40px; margin-bottom: 10px; }
+
+.profile-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.profile-card .nickname { font-size: 20px; font-weight: 700; }
+.profile-card .invite-code {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 20px;
+  background: #FFF3E0;
+  color: var(--primary);
+  border-radius: 20px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  font-family: monospace;
+}
+.profile-card .copy-btn {
+  margin-top: 10px;
+  padding: 8px 24px;
+  border: 1.5px solid var(--primary);
+  border-radius: 20px;
+  background: white;
+  color: var(--primary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 16px 0 10px;
+  color: var(--text);
+}
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--card);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.friend-item:active { background: #f9f5f0; }
+.friend-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.friend-info { flex: 1; margin-left: 12px; }
+.friend-name { font-size: 15px; font-weight: 500; }
+.friend-code { font-size: 12px; color: var(--text-light); }
+.friend-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: white;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-friend-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.add-friend-row input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1.5px solid #e8e0d8;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+  font-family: inherit;
+  background: #FAFAFA;
+}
+.add-friend-row input:focus { border-color: var(--primary); background: white; }
+.add-friend-row button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Chat */
+.chat-view { display: none; padding: 16px; }
+.chat-view.active { display: block; }
+.chat-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.chat-back {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #f0e8e0;
+  font-size: 18px;
+  cursor: pointer;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-title { font-size: 17px; font-weight: 600; }
+.chat-messages { min-height: 200px; max-height: 50vh; overflow-y: auto; margin-bottom: 12px; }
+.chat-msg {
+  margin-bottom: 10px;
+  display: flex;
+}
+.chat-msg.sent { justify-content: flex-end; }
+.chat-msg.received { justify-content: flex-start; }
+.chat-bubble {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.chat-msg.sent .chat-bubble {
+  background: var(--primary);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg.received .chat-bubble {
+  background: #f0e8e0;
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+.chat-time { font-size: 11px; color: var(--text-light); margin-top: 3px; }
+.chat-msg.sent .chat-time { text-align: right; }
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+}
+.chat-input-row input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1.5px solid #e8e0d8;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+}
+.chat-input-row input:focus { border-color: var(--primary); }
+.chat-input-row button {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 20px;
+  background: var(--primary);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Request card */
+.request-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+}
+.request-card .req-header { display: flex; justify-content: space-between; align-items: center; }
+.request-card .req-from { font-size: 13px; color: var(--text-light); }
+.request-card .req-dish { font-size: 17px; font-weight: 600; margin: 6px 0; }
+.request-card .req-actions { display: flex; gap: 8px; margin-top: 8px; }
+.request-card .btn-accept {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 16px;
+  background: var(--success);
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+.request-card .btn-decline {
+  padding: 6px 16px;
+  border: 1.5px solid #ddd;
+  border-radius: 16px;
+  background: white;
+  color: var(--text-light);
+  font-size: 13px;
+  cursor: pointer;
+}
+.request-card .req-status {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 10px;
+}
+.req-status.pending { background: #FFF3E0; color: #E65100; }
+.req-status.accepted { background: #E8F5E9; color: #2E7D32; }
+.req-status.declined { background: #FFEBEE; color: #C62828; }
+
+/* Friend meals view */
+.friend-meals-view { display: none; padding: 16px; }
+.friend-meals-view.active { display: block; }
 </style>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 </head>
 <body>
 
@@ -602,6 +833,7 @@ body {
 <div class="tabs">
   <button class="tab active" data-tab="records">记录</button>
   <button class="tab" data-tab="wheel">转盘</button>
+  <button class="tab" data-tab="social">好友</button>
   <button class="tab" data-tab="stats">统计</button>
 </div>
 
@@ -628,6 +860,82 @@ body {
       </div>
       <div class="food-tags" id="foodTags"></div>
     </div>
+  </div>
+</div>
+
+<!-- Social Page -->
+<div class="page" id="page-social">
+  <!-- Setup (shown when not logged in) -->
+  <div id="socialSetup">
+    <div class="profile-card">
+      <div style="font-size:40px;margin-bottom:10px">👋</div>
+      <p style="color:var(--text-light);margin-bottom:16px">设置昵称后即可与好友互动</p>
+      <input type="text" id="setupNickname" placeholder="输入你的昵称" style="width:100%;padding:12px;border:1.5px solid #e8e0d8;border-radius:12px;font-size:15px;text-align:center;outline:none;font-family:inherit">
+      <button onclick="setupUser()" style="margin-top:12px;padding:12px 32px;border:none;border-radius:12px;background:var(--primary);color:white;font-size:15px;font-weight:600;cursor:pointer">开始使用</button>
+    </div>
+  </div>
+
+  <!-- Main social view (shown after login) -->
+  <div id="socialMain" style="display:none">
+    <!-- Profile -->
+    <div class="profile-card">
+      <div class="nickname" id="myNickname"></div>
+      <div class="invite-code" id="myInviteCode"></div>
+      <div style="margin-top:10px">
+        <button class="copy-btn" onclick="copyInviteCode()">复制邀请码</button>
+        <button class="copy-btn" onclick="shareInviteCode()" style="margin-left:6px">分享</button>
+      </div>
+    </div>
+
+    <!-- Add friend -->
+    <div class="section-title">添加好友</div>
+    <div class="add-friend-row">
+      <input type="text" id="addFriendCode" placeholder="输入好友邀请码" maxlength="6" inputmode="numeric">
+      <button onclick="addFriend()">添加</button>
+    </div>
+
+    <!-- Pending requests -->
+    <div id="requestsSection" style="display:none">
+      <div class="section-title">点菜请求 🔔</div>
+      <div id="requestsList"></div>
+    </div>
+
+    <!-- Friends list -->
+    <div class="section-title">好友列表</div>
+    <div id="friendsList">
+      <div class="social-empty"><div class="icon">👥</div><p>还没有好友<br>输入邀请码添加吧</p></div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="section-title">好友动态</div>
+    <div id="activityFeed">
+      <div class="social-empty"><div class="icon">📡</div><p>暂无动态</p></div>
+    </div>
+  </div>
+
+  <!-- Chat view -->
+  <div class="chat-view" id="chatView">
+    <div class="chat-header">
+      <button class="chat-back" onclick="closeChat()">←</button>
+      <div class="chat-title" id="chatTitle"></div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div style="margin-bottom:10px">
+      <button onclick="showDishRequest()" style="padding:8px 16px;border:1.5px solid var(--primary);border-radius:16px;background:white;color:var(--primary);font-size:13px;cursor:pointer">🍽️ 点菜</button>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="留言..." >
+      <button onclick="sendMessage()">发送</button>
+    </div>
+  </div>
+
+  <!-- Friend meals view -->
+  <div class="friend-meals-view" id="friendMealsView">
+    <div class="chat-header">
+      <button class="chat-back" onclick="closeFriendMeals()">←</button>
+      <div class="chat-title" id="friendMealsTitle"></div>
+    </div>
+    <div id="friendMealsList"></div>
   </div>
 </div>
 
@@ -824,6 +1132,8 @@ function saveMeal() {
   closeModal();
   renderMeals();
   showToast('记录成功!');
+  // Sync to Firebase
+  if (db && myCode) syncMealsToFirebase();
 }
 
 // Render meals
@@ -873,6 +1183,7 @@ function deleteMeal(id) {
   saveMeals(meals);
   renderMeals();
   showToast('已删除');
+  if (db && myCode) syncMealsToFirebase();
 }
 
 // ===== Wheel =====
@@ -1203,7 +1514,7 @@ function renderStats() {
 }
 
 // ===== Auto Update =====
-const APP_VERSION = '1.4';
+const APP_VERSION = '1.5';
 // Replace with your GitHub repo: https://raw.githubusercontent.com/{owner}/{repo}/main/version.json
 // Supports multiple mirror URLs separated by | for China users
 const UPDATE_CHECK_URL = 'https://mirror.ghproxy.cc/https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json|https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json';
@@ -1262,30 +1573,39 @@ async function startUpdate() {
 
   // Try native plugin first
   if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppUpdate) {
-    // Try each URL until one works
+    // Listen for native download events
+    const AppUpdate = window.Capacitor.Plugins.AppUpdate;
+
+    AppUpdate.addListener('downloadComplete', () => {
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressText').textContent = '下载完成，正在安装...';
+      setTimeout(() => document.getElementById('updateProgress').classList.remove('show'), 3000);
+    });
+
+    AppUpdate.addListener('downloadFailed', (data) => {
+      document.getElementById('progressText').textContent = '下载失败: ' + (data.error || '未知错误');
+      setTimeout(() => document.getElementById('updateProgress').classList.remove('show'), 3000);
+    });
+
+    // Simulate progress while downloading
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 8;
+      if (progress > 85) progress = 85;
+      document.getElementById('progressBar').style.width = progress + '%';
+      document.getElementById('progressText').textContent = '正在下载... ' + Math.round(progress) + '%';
+    }, 800);
+
+    // Stop progress simulation when download completes
+    AppUpdate.addListener('downloadComplete', () => clearInterval(progressInterval));
+    AppUpdate.addListener('downloadFailed', () => clearInterval(progressInterval));
+
     for (const url of pendingDownloadUrls) {
       try {
-        document.getElementById('progressText').textContent = '正在下载...';
-        await window.Capacitor.Plugins.AppUpdate.downloadAndInstall({ url: url });
-
-        // Simulate progress
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += Math.random() * 15;
-          if (progress > 90) progress = 90;
-          document.getElementById('progressBar').style.width = progress + '%';
-          document.getElementById('progressText').textContent = Math.round(progress) + '%';
-        }, 500);
-
-        setTimeout(() => {
-          clearInterval(interval);
-          document.getElementById('progressBar').style.width = '100%';
-          document.getElementById('progressText').textContent = '下载完成，正在安装...';
-          setTimeout(() => document.getElementById('updateProgress').classList.remove('show'), 3000);
-        }, 5000);
-        return;
+        await AppUpdate.downloadAndInstall({ url: url });
+        return; // Download started successfully
       } catch (e) {
-        continue; // Try next URL
+        continue;
       }
     }
   }
@@ -1295,15 +1615,431 @@ async function startUpdate() {
   window.open(pendingDownloadUrls[0], '_system');
 }
 
+// ===== Social / Firebase =====
+// TODO: Replace with your Firebase config from https://console.firebase.google.com
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+let db = null;
+let myCode = localStorage.getItem('myInviteCode') || '';
+let myName = localStorage.getItem('myNickname') || '';
+let currentChatFriend = null;
+let friendsCache = {};
+
+function initFirebase() {
+  if (firebaseConfig.apiKey === 'YOUR_API_KEY') {
+    console.log('Firebase not configured yet');
+    return false;
+  }
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    return true;
+  } catch (e) {
+    console.error('Firebase init failed:', e);
+    return false;
+  }
+}
+
+function generateInviteCode() {
+  let code;
+  do {
+    code = Math.floor(100000 + Math.random() * 900000).toString();
+  } while (false); // In production, check uniqueness via Firebase
+  return code;
+}
+
+function setupUser() {
+  const nickname = document.getElementById('setupNickname').value.trim();
+  if (!nickname) { showToast('请输入昵称'); return; }
+  if (!db && !initFirebase()) { showToast('请先配置 Firebase'); return; }
+
+  myCode = generateInviteCode();
+  myName = nickname;
+  localStorage.setItem('myInviteCode', myCode);
+  localStorage.setItem('myNickname', myName);
+
+  // Save to Firebase
+  db.ref('users/' + myCode).set({
+    nickname: myName,
+    createdAt: firebase.database.ServerValue.TIMESTAMP
+  });
+
+  showSocialMain();
+  showToast('欢迎 ' + myName + '！');
+}
+
+function showSocialMain() {
+  document.getElementById('socialSetup').style.display = 'none';
+  document.getElementById('socialMain').style.display = 'block';
+  document.getElementById('chatView').classList.remove('active');
+  document.getElementById('friendMealsView').classList.remove('active');
+  document.getElementById('myNickname').textContent = myName;
+  document.getElementById('myInviteCode').textContent = myCode;
+
+  if (db) {
+    listenFriends();
+    listenRequests();
+    listenActivity();
+  }
+}
+
+function copyInviteCode() {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(myCode);
+    showToast('邀请码已复制');
+  } else {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = myCode;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('邀请码已复制');
+  }
+}
+
+function shareInviteCode() {
+  const text = `我在用"今天吃什么"APP，加我好友吧！邀请码：${myCode}`;
+  if (navigator.share) {
+    navigator.share({ title: '今天吃什么', text: text });
+  } else {
+    if (navigator.clipboard) navigator.clipboard.writeText(text);
+    showToast('分享内容已复制');
+  }
+}
+
+// Friends
+function addFriend() {
+  const code = document.getElementById('addFriendCode').value.trim();
+  if (!code) { showToast('请输入邀请码'); return; }
+  if (code === myCode) { showToast('不能添加自己'); return; }
+  if (!db) return;
+
+  // Check if user exists
+  db.ref('users/' + code).once('value', (snap) => {
+    if (!snap.exists()) {
+      showToast('邀请码不存在');
+      return;
+    }
+    // Add friend (bidirectional)
+    db.ref('friends/' + myCode + '/' + code).set(true);
+    db.ref('friends/' + code + '/' + myCode).set(true);
+    document.getElementById('addFriendCode').value = '';
+    showToast('已添加好友: ' + snap.val().nickname);
+  });
+}
+
+function listenFriends() {
+  if (!db || !myCode) return;
+  db.ref('friends/' + myCode).on('value', async (snap) => {
+    const codes = snap.val() || {};
+    const list = document.getElementById('friendsList');
+    const friendCodes = Object.keys(codes);
+
+    if (friendCodes.length === 0) {
+      list.innerHTML = '<div class="social-empty"><div class="icon">👥</div><p>还没有好友<br>输入邀请码添加吧</p></div>';
+      return;
+    }
+
+    let html = '';
+    for (const fc of friendCodes) {
+      try {
+        const userSnap = await db.ref('users/' + fc).once('value');
+        const user = userSnap.val();
+        if (user) {
+          friendsCache[fc] = user.nickname;
+          html += `<div class="friend-item" onclick="openFriendChat('${fc}', '${escHtml(user.nickname)}')">
+            <div class="friend-avatar">${user.nickname.charAt(0)}</div>
+            <div class="friend-info">
+              <div class="friend-name">${escHtml(user.nickname)}</div>
+              <div class="friend-code">${fc}</div>
+            </div>
+          </div>`;
+        }
+      } catch (e) {}
+    }
+    list.innerHTML = html || '<div class="social-empty"><p>加载中...</p></div>';
+  });
+}
+
+// Chat
+function openFriendChat(friendCode, friendName) {
+  currentChatFriend = { code: friendCode, name: friendName };
+  document.getElementById('socialMain').style.display = 'none';
+  document.getElementById('chatView').classList.add('active');
+  document.getElementById('chatTitle').textContent = friendName;
+  document.getElementById('chatMessages').innerHTML = '';
+  loadMessages(friendCode);
+}
+
+function closeChat() {
+  currentChatFriend = null;
+  document.getElementById('chatView').classList.remove('active');
+  document.getElementById('socialMain').style.display = 'block';
+}
+
+function getChatId(code1, code2) {
+  return [code1, code2].sort().join('_');
+}
+
+function loadMessages(friendCode) {
+  if (!db) return;
+  const chatId = getChatId(myCode, friendCode);
+  db.ref('chats/' + chatId).orderByChild('time').limitToLast(50).on('value', (snap) => {
+    const msgs = snap.val() || {};
+    const container = document.getElementById('chatMessages');
+    let html = '';
+    for (const [id, msg] of Object.entries(msgs)) {
+      const isSent = msg.from === myCode;
+      const time = new Date(msg.time);
+      const timeStr = `${time.getHours().toString().padStart(2,'0')}:${time.getMinutes().toString().padStart(2,'0')}`;
+      html += `<div class="chat-msg ${isSent ? 'sent' : 'received'}">
+        <div>
+          <div class="chat-bubble">${escHtml(msg.text)}</div>
+          <div class="chat-time">${timeStr}</div>
+        </div>
+      </div>`;
+    }
+    container.innerHTML = html;
+    container.scrollTop = container.scrollHeight;
+  });
+}
+
+function sendMessage() {
+  if (!currentChatFriend || !db) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const chatId = getChatId(myCode, currentChatFriend.code);
+  db.ref('chats/' + chatId).push({
+    from: myCode,
+    text: text,
+    time: firebase.database.ServerValue.TIMESTAMP
+  });
+  input.value = '';
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// Dish request
+function showDishRequest() {
+  if (!currentChatFriend) return;
+  const dish = prompt('想让 TA 做什么菜？');
+  if (!dish || !dish.trim()) return;
+
+  db.ref('requests/' + currentChatFriend.code).push({
+    from: myCode,
+    fromName: myName,
+    dish: dish.trim(),
+    status: 'pending',
+    time: firebase.database.ServerValue.TIMESTAMP
+  });
+
+  // Also send as chat message
+  const chatId = getChatId(myCode, currentChatFriend.code);
+  db.ref('chats/' + chatId).push({
+    from: myCode,
+    text: `🍽️ 我想吃：${dish.trim()}`,
+    time: firebase.database.ServerValue.TIMESTAMP
+  });
+
+  showToast('点菜请求已发送');
+}
+
+// Listen for incoming requests
+function listenRequests() {
+  if (!db || !myCode) return;
+  db.ref('requests/' + myCode).orderByChild('time').limitToLast(20).on('value', (snap) => {
+    const reqs = snap.val() || {};
+    const list = document.getElementById('requestsList');
+    const section = document.getElementById('requestsSection');
+    const entries = Object.entries(reqs).reverse();
+
+    if (entries.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+    let html = '';
+    for (const [id, req] of entries) {
+      const time = new Date(req.time);
+      const timeStr = `${time.getMonth()+1}/${time.getDate()} ${time.getHours().toString().padStart(2,'0')}:${time.getMinutes().toString().padStart(2,'0')}`;
+      const statusClass = req.status || 'pending';
+      const statusText = { pending: '待回应', accepted: '已接受', declined: '已拒绝' }[statusClass];
+
+      html += `<div class="request-card">
+        <div class="req-header">
+          <span class="req-from">${escHtml(req.fromName || '好友')} 的点菜</span>
+          <span class="req-status ${statusClass}">${statusText}</span>
+        </div>
+        <div class="req-dish">${escHtml(req.dish)}</div>
+        <div style="font-size:12px;color:#999">${timeStr}</div>`;
+      if (statusClass === 'pending') {
+        html += `<div class="req-actions">
+          <button class="btn-accept" onclick="respondRequest('${id}','${escHtml(req.from)}','accepted','${escHtml(req.dish)}')">做！</button>
+          <button class="btn-decline" onclick="respondRequest('${id}','${escHtml(req.from)}','declined','${escHtml(req.dish)}')">不做</button>
+        </div>`;
+      }
+      html += '</div>';
+    }
+    list.innerHTML = html;
+  });
+}
+
+function respondRequest(reqId, fromCode, status, dish) {
+  if (!db) return;
+  db.ref('requests/' + myCode + '/' + reqId + '/status').set(status);
+
+  // Notify via chat
+  const chatId = getChatId(myCode, fromCode);
+  const text = status === 'accepted'
+    ? `✅ 好的，我来做「${dish}」！`
+    : `❌ 这个做不了呀，换个别的吧`;
+  db.ref('chats/' + chatId).push({
+    from: myCode,
+    text: text,
+    time: firebase.database.ServerValue.TIMESTAMP
+  });
+
+  showToast(status === 'accepted' ? '已接受点菜' : '已拒绝');
+}
+
+// Activity feed
+function listenActivity() {
+  if (!db || !myCode) return;
+  db.ref('friends/' + myCode).on('value', async (snap) => {
+    const codes = Object.keys(snap.val() || {});
+    const feed = document.getElementById('activityFeed');
+    const activities = [];
+
+    for (const fc of codes) {
+      try {
+        const mealsSnap = await db.ref('meals/' + fc).orderByChild('time').limitToLast(3).once('value');
+        const meals = mealsSnap.val() || {};
+        const name = friendsCache[fc] || fc;
+        for (const [id, meal] of Object.entries(meals)) {
+          activities.push({ name, meal, code: fc });
+        }
+      } catch (e) {}
+    }
+
+    activities.sort((a, b) => b.meal.time - a.meal.time);
+
+    if (activities.length === 0) {
+      feed.innerHTML = '<div class="social-empty"><div class="icon">📡</div><p>暂无动态</p></div>';
+      return;
+    }
+
+    const tagLabels = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐', other: '其他' };
+    let html = '';
+    for (const act of activities.slice(0, 10)) {
+      const d = new Date(act.meal.time);
+      const timeStr = `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+      html += `<div class="meal-card" onclick="openFriendChat('${act.code}', '${escHtml(act.name)}')">
+        <div class="meal-time">${timeStr} · ${escHtml(act.name)}</div>
+        <span class="meal-tag tag-${act.meal.tag}">${tagLabels[act.meal.tag] || '其他'}</span>
+        <div class="meal-name">${escHtml(act.meal.name)}</div>
+        ${act.meal.note ? `<div style="font-size:13px;color:#888;margin-top:4px">${escHtml(act.meal.note)}</div>` : ''}
+      </div>`;
+    }
+    feed.innerHTML = html;
+  });
+}
+
+// Sync local meals to Firebase
+function syncMealsToFirebase() {
+  if (!db || !myCode) return;
+  const meals = getMeals();
+  const mealData = {};
+  for (const m of meals) {
+    mealData[m.id] = {
+      name: m.name,
+      tag: m.tag,
+      note: m.note || '',
+      photo: m.photo || null,
+      time: m.time
+    };
+  }
+  db.ref('meals/' + myCode).set(mealData);
+}
+
+// Friend meals view
+function openFriendMealsView(friendCode, friendName) {
+  document.getElementById('socialMain').style.display = 'none';
+  document.getElementById('friendMealsView').classList.add('active');
+  document.getElementById('friendMealsTitle').textContent = friendName + ' 的记录';
+
+  db.ref('meals/' + friendCode).orderByChild('time').limitToLast(20).once('value', (snap) => {
+    const meals = snap.val() || {};
+    const list = document.getElementById('friendMealsList');
+    const entries = Object.entries(meals).reverse();
+    const tagLabels = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐', other: '其他' };
+
+    if (entries.length === 0) {
+      list.innerHTML = '<div class="social-empty"><p>暂无记录</p></div>';
+      return;
+    }
+
+    let html = '';
+    for (const [id, m] of entries) {
+      const d = new Date(m.time);
+      const timeStr = `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+      html += `<div class="meal-card">
+        <div class="meal-time">${timeStr}</div>
+        <span class="meal-tag tag-${m.tag}">${tagLabels[m.tag] || '其他'}</span>
+        <div class="meal-name">${escHtml(m.name)}</div>
+        ${m.note ? `<div style="font-size:13px;color:#888;margin-top:4px">${escHtml(m.note)}</div>` : ''}
+      </div>`;
+    }
+    list.innerHTML = html;
+  });
+}
+
+function closeFriendMeals() {
+  document.getElementById('friendMealsView').classList.remove('active');
+  document.getElementById('socialMain').style.display = 'block';
+}
+
+// Init social
+function initSocial() {
+  if (!initFirebase()) return;
+  if (myCode && myName) {
+    showSocialMain();
+    // Sync meals on load
+    syncMealsToFirebase();
+  }
+}
+
+// Re-sync meals when saving
+const originalSaveMeal = typeof saveMeal === 'function' ? saveMeal : null;
+
 // ===== Init =====
 renderMeals();
 renderWheelFoods();
 drawWheel();
 renderStats();
 checkForUpdate();
+initSocial();
 
 // Update stats when switching to stats tab
 document.querySelector('[data-tab="stats"]').addEventListener('click', renderStats);
+// Sync meals when switching to social tab
+document.querySelector('[data-tab="social"]').addEventListener('click', () => {
+  if (db && myCode) syncMealsToFirebase();
+});
 </script>
 </body>
 </html>

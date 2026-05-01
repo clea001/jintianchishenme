@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -25,6 +26,7 @@ public class UpdatePlugin extends Plugin {
 
     private long downloadId = -1;
     private BroadcastReceiver downloadReceiver;
+    private PluginCall savedCall;
 
     @PluginMethod
     public void downloadAndInstall(PluginCall call) {
@@ -34,6 +36,7 @@ public class UpdatePlugin extends Plugin {
             return;
         }
 
+        savedCall = call;
         Context ctx = getContext();
         DownloadManager dm = (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
 
@@ -47,6 +50,8 @@ public class UpdatePlugin extends Plugin {
         request.setDestinationInExternalFilesDir(ctx, Environment.DIRECTORY_DOWNLOADS, "update.apk");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setMimeType("application/vnd.android.package-archive");
+        request.setAllowedOverMetered(true);
+        request.setAllowedOverRoaming(true);
 
         downloadId = dm.enqueue(request);
 
@@ -61,26 +66,31 @@ public class UpdatePlugin extends Plugin {
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (id != downloadId) return;
 
+                try { context.unregisterReceiver(downloadReceiver); } catch (Exception ignored) {}
+                downloadReceiver = null;
+
                 // Check download status
                 DownloadManager.Query query = new DownloadManager.Query();
                 query.setFilterById(downloadId);
                 Cursor cursor = dm.query(query);
                 if (cursor != null && cursor.moveToFirst()) {
-                    int status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
-                    cursor.close();
+                    int statusIdx = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS);
+                    int status = cursor.getInt(statusIdx);
 
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                        cursor.close();
+                        // Notify JS download complete
+                        notifyDownloadComplete();
+                        // Install
                         installApk(context, apkFile);
-                        JSObject result = new JSObject();
-                        result.put("success", true);
-                        call.resolve(result);
                     } else {
-                        call.reject("Download failed with status: " + status);
+                        cursor.close();
+                        notifyDownloadFailed("Download status: " + status);
                     }
+                } else {
+                    if (cursor != null) cursor.close();
+                    notifyDownloadFailed("Download query failed");
                 }
-
-                try { context.unregisterReceiver(downloadReceiver); } catch (Exception ignored) {}
-                downloadReceiver = null;
             }
         };
 
@@ -90,14 +100,34 @@ public class UpdatePlugin extends Plugin {
             ctx.registerReceiver(downloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         }
 
-        // Return immediately - the call will be resolved via a saved reference
-        // For simplicity, we resolve immediately to indicate download started
+        // Return immediately - JS will be notified when download completes
         JSObject result = new JSObject();
         result.put("started", true);
         call.resolve(result);
     }
 
+    private void notifyDownloadComplete() {
+        try {
+            JSObject data = new JSObject();
+            data.put("complete", true);
+            notifyListeners("downloadComplete", data);
+        } catch (Exception ignored) {}
+    }
+
+    private void notifyDownloadFailed(String reason) {
+        try {
+            JSObject data = new JSObject();
+            data.put("error", reason);
+            notifyListeners("downloadFailed", data);
+        } catch (Exception ignored) {}
+    }
+
     private void installApk(Context context, File apkFile) {
+        if (!apkFile.exists()) {
+            notifyDownloadFailed("APK file not found");
+            return;
+        }
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -111,6 +141,14 @@ public class UpdatePlugin extends Plugin {
                     "application/vnd.android.package-archive");
         }
 
-        context.startActivity(intent);
+        try {
+            context.startActivity(intent);
+        } catch (Exception e) {
+            // If install fails, open download folder
+            notifyDownloadFailed("Install failed: " + e.getMessage());
+            Intent viewIntent = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
+            viewIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(viewIntent);
+        }
     }
 }
