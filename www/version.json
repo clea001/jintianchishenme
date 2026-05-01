@@ -1,6 +1,6 @@
 {
-  "version": "1.1",
-  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.1/jintianchishenme.apk",
-  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.1/jintianchishenme.apk",
-  "changelog": "1. 新增转盘手势滑动交互\n2. 修复照片记录bug\n3. 新增自动更新功能"
+  "version": "1.2",
+  "downloadUrl": "https://mirror.ghproxy.cc/https://github.com/clea001/jintianchishenme/releases/download/v1.2/jintianchishenme.apk",
+  "downloadUrlFallback": "https://github.com/clea001/jintianchishenme/releases/download/v1.2/jintianchishenme.apk",
+  "changelog": "1. 修复转盘结果与显示不一致的bug"
 }

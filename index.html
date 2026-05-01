@@ -1030,12 +1030,17 @@ function onPointerUp(e) {
   document.getElementById('wheelResult').textContent = '';
 
   let vel = velocity;
-  const friction = 0.97; // Deceleration factor
+  const friction = 0.97;
   const minVel = 0.05;
+  let lastTime = performance.now();
 
-  function flingAnimate() {
-    vel *= friction;
-    currentAngle += vel / 60; // ~60fps
+  function flingAnimate(now) {
+    const dt = (now - lastTime) / 1000; // seconds
+    lastTime = now;
+    // Apply friction per frame at ~60fps equivalence
+    const frames = dt * 60;
+    vel *= Math.pow(friction, frames);
+    currentAngle += vel * dt;
     drawWheel();
 
     if (Math.abs(vel) > minVel) {
@@ -1045,6 +1050,7 @@ function onPointerUp(e) {
       onSpinEnd();
     }
   }
+  lastTime = performance.now();
   flingRaf = requestAnimationFrame(flingAnimate);
 }
 
@@ -1058,31 +1064,61 @@ window.addEventListener('touchmove', onPointerMove, { passive: false });
 window.addEventListener('touchend', onPointerUp);
 
 // ---- Determine result when spin stops ----
-function getSelectedFood() {
+function getSelectedFood(angle) {
   if (wheelFoods.length === 0) return null;
   const n = wheelFoods.length;
   const arc = (Math.PI * 2) / n;
-  // Pointer is at top (angle = -PI/2 in canvas coords)
-  // The wheel rotation that puts segment i at top: i * arc + arc/2
-  // So we reverse: which segment is at top given currentAngle?
-  let norm = ((-currentAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-  // Offset by PI/2 because segments start at -PI/2
-  norm = (norm + Math.PI / 2) % (Math.PI * 2);
-  const index = Math.floor(norm / arc) % n;
-  return wheelFoods[index];
+  // Pointer is at top (-PI/2 in canvas coords).
+  // Segment i spans: i*arc to (i+1)*arc in wheel-local coords (starting from top).
+  // Wheel-local angle of pointer = -PI/2 - currentAngle.
+  // Shift so segment 0 starts at 0: add PI/2.
+  let localAngle = (-angle + Math.PI / 2) % (Math.PI * 2);
+  if (localAngle < 0) localAngle += Math.PI * 2;
+  const index = Math.floor(localAngle / arc) % n;
+  return { food: wheelFoods[index], index: index };
+}
+
+function showResult(result) {
+  if (result) {
+    document.getElementById('wheelResult').textContent = `就吃 ${result.food}！`;
+    showToast(`今天吃 ${result.food}！`);
+  }
+}
+
+function animateToAngle(targetAngle, duration, callback) {
+  const startAngle = currentAngle;
+  const startTime = performance.now();
+  const distance = targetAngle - startAngle;
+
+  function easeOut(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    currentAngle = startAngle + distance * easeOut(t);
+    drawWheel();
+
+    if (t < 1) {
+      flingRaf = requestAnimationFrame(step);
+    } else {
+      currentAngle = targetAngle;
+      drawWheel();
+      flingRaf = null;
+      if (callback) callback();
+    }
+  }
+  flingRaf = requestAnimationFrame(step);
 }
 
 function onSpinEnd() {
   isSpinning = false;
   document.getElementById('btnSpin').disabled = false;
-  const result = getSelectedFood();
-  if (result) {
-    document.getElementById('wheelResult').textContent = `就吃 ${result}！`;
-    showToast(`今天吃 ${result}！`);
-  }
+  showResult(getSelectedFood(currentAngle));
 }
 
-// Button spin
+// Button spin: pick result first, then animate to it
 function spinWheel() {
   if (isSpinning || wheelFoods.length === 0) {
     if (wheelFoods.length === 0) showToast('请先添加食物');
@@ -1092,25 +1128,26 @@ function spinWheel() {
   document.getElementById('btnSpin').disabled = true;
   document.getElementById('wheelResult').textContent = '';
 
-  // Random velocity: 15~25 rad/s
-  let vel = 15 + Math.random() * 10;
-  if (Math.random() < 0.5) vel = -vel;
-  const friction = 0.975;
-  const minVel = 0.05;
+  const n = wheelFoods.length;
+  const arc = (Math.PI * 2) / n;
 
-  function animate() {
-    vel *= friction;
-    currentAngle += vel / 60;
-    drawWheel();
+  // Pick a random food
+  const selectedIndex = Math.floor(Math.random() * n);
 
-    if (Math.abs(vel) > minVel) {
-      flingRaf = requestAnimationFrame(animate);
-    } else {
-      flingRaf = null;
-      onSpinEnd();
-    }
-  }
-  flingRaf = requestAnimationFrame(animate);
+  // Calculate target angle so selected segment lands at pointer (top)
+  // Segment i center in wheel-local coords: i*arc + arc/2
+  // Pointer local angle with rotation: -targetAngle + PI/2 = i*arc + arc/2
+  // targetAngle = PI/2 - i*arc - arc/2 + fullSpins*2*PI
+  const fullSpins = 5 + Math.floor(Math.random() * 3);
+  const targetAngle = currentAngle + (Math.PI / 2 - selectedIndex * arc - arc / 2 - currentAngle) + fullSpins * Math.PI * 2;
+
+  const duration = 3500 + Math.random() * 1500;
+
+  animateToAngle(targetAngle, duration, () => {
+    isSpinning = false;
+    document.getElementById('btnSpin').disabled = false;
+    showResult(getSelectedFood(currentAngle));
+  });
 }
 
 // ===== Stats =====
@@ -1149,7 +1186,7 @@ function renderStats() {
 }
 
 // ===== Auto Update =====
-const APP_VERSION = '1.1';
+const APP_VERSION = '1.2';
 // Replace with your GitHub repo: https://raw.githubusercontent.com/{owner}/{repo}/main/version.json
 // Supports multiple mirror URLs separated by | for China users
 const UPDATE_CHECK_URL = 'https://mirror.ghproxy.cc/https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json|https://raw.githubusercontent.com/clea001/jintianchishenme/main/www/version.json';
